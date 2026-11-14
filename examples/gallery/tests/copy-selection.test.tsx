@@ -32,9 +32,11 @@ async function selectArea(app: App): Promise<string> {
   return area.slice("Area [".length, -1);
 }
 
-// Focuses input `id`; it keeps the focus while text is selected.
+// Focuses input `id`; it keeps the focus while text is selected. Types
+// nothing: that presses the input as `press` does on macOS, and finds it on
+// Windows, where an input is not among the pressable views.
 async function focus(app: App, id: "composer" | "notes") {
-  await app.press(`id:${id}`);
+  await app.type(`id:${id}`, "");
   await app.waitFor(`text:Focus [${id}]`);
 }
 
