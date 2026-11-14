@@ -1905,24 +1905,14 @@ fn send_key(input: &InputState, vk: u16, modifiers: Modifiers) {
 /// surface selects something.
 fn copy_is_elsewhere(surface: &Surface, input: &InputState) -> bool {
     let (start, end) = input.selection();
-    let text = crate::text::has_selection(surface);
-    let area = crate::selectable_view::has_selection(surface);
-    // DEBUG (temporary): what the guard saw, on the clipboard.
-    crate::system::set_clipboard_text(&format!("DBG3 own=({start},{end}) text={text} area={area}"));
-    start == end && (text || area)
+    start == end
+        && (crate::text::has_selection(surface) || crate::selectable_view::has_selection(surface))
 }
 
 /// A key for the focused field; true when handled.
 pub(crate) fn key(surface: &Rc<Surface>, event: &KeyEvent) -> bool {
     if !event.down {
         return false;
-    }
-    // DEBUG (temporary): a trace on the clipboard that Ctrl+C reached the field's keys.
-    if event.vk == 0x43 && event.modifiers.ctrl {
-        crate::system::set_clipboard_text(&format!(
-            "DBG2 text_input::key focused={}",
-            focused(surface).is_some()
-        ));
     }
     let Some(view) = focused(surface) else {
         return false;
