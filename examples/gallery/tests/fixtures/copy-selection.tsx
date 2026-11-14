@@ -12,7 +12,7 @@ function App() {
   const restored = signal(false);
   let before: string | undefined;
   void (async () => {
-    if (platform.os !== "macos") return;
+    if (platform.os !== "macos" && platform.os !== "windows") return;
     try {
       const held = await Clipboard.readText();
       await Clipboard.writeText("copy-selection sentinel");
