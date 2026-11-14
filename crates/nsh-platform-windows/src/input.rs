@@ -1278,6 +1278,10 @@ pub(crate) fn wheel(surface: &Rc<Surface>, event: WheelEvent) {
 /// is reported to the focused custom view (or heard for Alt's release)
 /// and runs nothing else.
 pub(crate) fn key(surface: &Rc<Surface>, event: KeyEvent) -> bool {
+    // DEBUG (temporary): a trace on the clipboard that Ctrl+C reached the dispatch.
+    if event.down && event.vk == 0x43 && event.modifiers.ctrl {
+        crate::system::set_clipboard_text("DBG1 input::key reached");
+    }
     let input = &surface.input;
     if MODIFIER_KEYS.contains(&event.vk) && !event.repeat {
         modifiers_changed(surface, event.modifiers);

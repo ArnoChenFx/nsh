@@ -788,11 +788,21 @@ pub(crate) fn key(surface: &Rc<Surface>, event: &KeyEvent) -> bool {
     }
     let key = surface.key();
     let Some(current) = take(key, None) else {
+        // DEBUG (temporary): no current area when Ctrl+C came.
+        if event.vk == VK_C && event.modifiers.ctrl {
+            crate::system::set_clipboard_text("DBG4 selectable_view::key: no current area");
+        }
         return false;
     };
     let area = current.area.clone();
     let (attached, empty) = (area.attached(), current.model.is_empty());
     put(current);
+    // DEBUG (temporary): the area's state when Ctrl+C came.
+    if event.vk == VK_C && event.modifiers.ctrl && (!attached || empty) {
+        crate::system::set_clipboard_text(&format!(
+            "DBG5 selectable_view::key attached={attached} empty={empty}"
+        ));
+    }
     if !attached {
         return false;
     }
