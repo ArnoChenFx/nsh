@@ -93,3 +93,38 @@ test("Cmd/Ctrl+C with nothing selected leaves the clipboard as it was", () =>
     await new Promise((resolve) => setTimeout(resolve, 400));
     expect(app.shows("text:Clipboard [copy-selection sentinel]")).toBe(true);
   }));
+
+// DIAGNOSTIC (temporary, to be removed): with no input in the way, does a
+// selection copy at all in this harness?
+test("DIAG Cmd/Ctrl+C with no input focused copies a selectable view's selection", () =>
+  onDesktop(async (app) => {
+    const selected = await selectArea(app);
+    expect(app.shows("text:Focus [none]")).toBe(true);
+    await app.keyboard.press("mod+c");
+    await app.waitFor(`text:Clipboard [${selected}]`, { timeout: 2000 });
+  }));
+
+test("DIAG Cmd/Ctrl+C with no input focused copies a selectable text's selection", () =>
+  onDesktop(async (app) => {
+    await app.drag("text:Zeta eta theta iota", { x: -60, y: 0 });
+    expect(app.shows("text:Focus [none]")).toBe(true);
+    await app.keyboard.press("mod+c");
+    await app.waitUntil(
+      () => {
+        const board = app.texts().find((t) => t.startsWith("Clipboard ["));
+        const copied = board?.slice("Clipboard [".length, -1) ?? "";
+        return copied !== "copy-selection sentinel" && copied.length > 0 && "Zeta eta theta iota".includes(copied);
+      },
+      { timeout: 2000 },
+    );
+  }));
+
+// DIAGNOSTIC (temporary): does the Ctrl modifier reach the input's editor?
+// Select all, then a typed character replaces what was there.
+test("DIAG Cmd/Ctrl+A in the composer selects all, a typed character replaces it", () =>
+  onDesktop(async (app) => {
+    await app.type("id:composer", "abc");
+    await app.keyboard.press("mod+a");
+    await app.keyboard.press("x");
+    await app.waitUntil(() => app.value("id:composer") === "x", { timeout: 2000 });
+  }));
